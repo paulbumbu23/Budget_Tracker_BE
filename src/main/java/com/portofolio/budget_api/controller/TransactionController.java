@@ -1,6 +1,8 @@
 package com.portofolio.budget_api.controller;
 
+import com.portofolio.budget_api.model.dto.request.MonthlyReportRequest;
 import com.portofolio.budget_api.model.dto.request.TransactionRequest;
+import com.portofolio.budget_api.model.dto.response.MonthlyReportResponse;
 import com.portofolio.budget_api.model.dto.response.TransactionResponse;
 import com.portofolio.budget_api.service.ITransactionService;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +39,21 @@ public class TransactionController {
 
         transactionService.deleteTransaction(transactionId);
         return ResponseEntity.ok("Transaction deleted successfully!");
+    }
+
+    @PutMapping("/{transactionId}")
+    public ResponseEntity<TransactionResponse> updateTransaction(
+            @PathVariable Long transactionId,
+            @RequestBody TransactionRequest request) {
+
+        return ResponseEntity.ok(transactionService.updateTransaction(transactionId, request));
+    }
+
+    @GetMapping("/user/{userId}/report")
+    public ResponseEntity<MonthlyReportResponse> getMonthlyReport(
+            @PathVariable Long userId,
+            @ModelAttribute MonthlyReportRequest request) {
+
+        return ResponseEntity.ok(transactionService.getMonthlyReport(userId, request));
     }
 }
