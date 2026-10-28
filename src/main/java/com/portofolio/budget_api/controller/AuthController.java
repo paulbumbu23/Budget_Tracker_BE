@@ -1,6 +1,8 @@
 package com.portofolio.budget_api.controller;
 
+import com.portofolio.budget_api.model.dto.request.LoginRequest;
 import com.portofolio.budget_api.model.dto.request.RegisterRequest;
+import com.portofolio.budget_api.model.dto.response.AuthResponse;
 import com.portofolio.budget_api.model.dto.response.UserResponse;
 import com.portofolio.budget_api.model.entity.User;
 import com.portofolio.budget_api.service.IUserService;
@@ -23,6 +25,11 @@ public class AuthController {
         UserResponse response = userService.registerUser(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(userService.loginUser(request));
     }
 }
 

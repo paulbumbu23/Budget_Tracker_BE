@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -18,27 +19,27 @@ public class TransactionController {
 
     private final ITransactionService transactionService;
 
-    @PostMapping("/user/{userId}")
+    @PostMapping
     public ResponseEntity<TransactionResponse> addTransaction(
-            @PathVariable Long userId,
-            @RequestBody TransactionRequest request) {
+            @RequestBody TransactionRequest request,
+            Principal principal) {
 
-        TransactionResponse response = transactionService.addTransaction(userId, request);
+        TransactionResponse response = transactionService.addTransaction(principal.getName(), request);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<TransactionResponse>> getUserTransactions(@PathVariable Long userId) {
-
-        List<TransactionResponse> responses = transactionService.getAllTransactionsByUserId(userId);
+    @GetMapping
+    public ResponseEntity<List<TransactionResponse>> getUserTransactions(Principal principal) {
+        List<TransactionResponse> responses = transactionService.getAllTransactionsByUserEmail(principal.getName());
         return ResponseEntity.ok(responses);
     }
 
-    @DeleteMapping("/{transactionId}")
-    public ResponseEntity<String> deleteTransaction(@PathVariable Long transactionId) {
+    @GetMapping("/report")
+    public ResponseEntity<MonthlyReportResponse> getMonthlyReport(
+            @ModelAttribute MonthlyReportRequest request,
+            Principal principal) {
 
-        transactionService.deleteTransaction(transactionId);
-        return ResponseEntity.ok("Transaction deleted successfully!");
+        return ResponseEntity.ok(transactionService.getMonthlyReport(principal.getName(), request));
     }
 
     @PutMapping("/{transactionId}")
@@ -49,11 +50,10 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.updateTransaction(transactionId, request));
     }
 
-    @GetMapping("/user/{userId}/report")
-    public ResponseEntity<MonthlyReportResponse> getMonthlyReport(
-            @PathVariable Long userId,
-            @ModelAttribute MonthlyReportRequest request) {
+    @DeleteMapping("/{transactionId}")
+    public ResponseEntity<String> deleteTransaction(@PathVariable Long transactionId) {
 
-        return ResponseEntity.ok(transactionService.getMonthlyReport(userId, request));
+        transactionService.deleteTransaction(transactionId);
+        return ResponseEntity.ok("Transaction deleted successfully!");
     }
 }

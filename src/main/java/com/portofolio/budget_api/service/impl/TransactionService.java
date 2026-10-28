@@ -29,8 +29,10 @@ public class TransactionService implements ITransactionService {
     private final TransactionConverter transactionConverter;
 
     @Override
-    public TransactionResponse addTransaction(Long userId, TransactionRequest transactionRequest){
-        User user = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User with id " + userId + " not found"));
+    public TransactionResponse addTransaction(String email, TransactionRequest transactionRequest){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new ResourceNotFoundException("User with email " + email + " not found"));
+
         Transaction transaction = transactionConverter.toEntity(transactionRequest);
         transaction.setUser(user);
 
@@ -38,9 +40,13 @@ public class TransactionService implements ITransactionService {
         return transactionConverter.toResponse(savedTransaction);
     }
 
+
     @Override
-    public List<TransactionResponse> getAllTransactionsByUserId(Long userId) {
-        return transactionRepository.findByUserId(userId).stream()
+    public List<TransactionResponse> getAllTransactionsByUserEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        return transactionRepository.findByUserId(user.getId()).stream()
                 .map(transactionConverter::toResponse)
                 .collect(Collectors.toList());
     }
@@ -69,17 +75,16 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public MonthlyReportResponse getMonthlyReport(Long userId, MonthlyReportRequest request) {
-        if (!userRepository.existsById(userId)) {
-            throw new ResourceNotFoundException("User with ID " + userId + " not found!");
-        }
+    public MonthlyReportResponse getMonthlyReport(String email, MonthlyReportRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User with " + email + " not found!"));
 
         YearMonth yearMonth = YearMonth.of(request.getYear(), request.getMonth());
         LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
         LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
 
         List<Transaction> transactions = transactionRepository
-                .findByUserIdAndTransactionDateBetween(userId, startOfMonth, endOfMonth);
+                .findByUserIdAndTransactionDateBetween(user.getId(), startOfMonth, endOfMonth);
 
         BigDecimal totalIncome = transactions.stream()
                 .filter(t -> t.getType() == TransactionType.INCOME)

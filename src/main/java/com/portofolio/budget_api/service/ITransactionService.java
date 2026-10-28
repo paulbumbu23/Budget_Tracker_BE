@@ -9,9 +9,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ITransactionService {
-    TransactionResponse addTransaction(Long userId, TransactionRequest transactionRequest);
-    List<TransactionResponse> getAllTransactionsByUserId(Long userId);
+    TransactionResponse addTransaction(String email, TransactionRequest transactionRequest);
     void deleteTransaction (Long transactionId);
     TransactionResponse updateTransaction(Long transactionId, TransactionRequest transactionRequest);
-    MonthlyReportResponse getMonthlyReport(Long userId, MonthlyReportRequest monthlyReportRequest);
+    MonthlyReportResponse getMonthlyReport(String email, MonthlyReportRequest monthlyReportRequest);
+
+    List<TransactionResponse> getAllTransactionsByUserEmail(String name);
+
 }
