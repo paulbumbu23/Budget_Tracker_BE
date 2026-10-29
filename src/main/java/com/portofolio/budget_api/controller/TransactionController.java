@@ -5,6 +5,7 @@ import com.portofolio.budget_api.model.dto.request.TransactionRequest;
 import com.portofolio.budget_api.model.dto.response.MonthlyReportResponse;
 import com.portofolio.budget_api.model.dto.response.TransactionResponse;
 import com.portofolio.budget_api.service.ITransactionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class TransactionController {
 
     @PostMapping
     public ResponseEntity<TransactionResponse> addTransaction(
-            @RequestBody TransactionRequest request,
+            @Valid @RequestBody TransactionRequest request,
             Principal principal) {
 
         TransactionResponse response = transactionService.addTransaction(principal.getName(), request);
@@ -45,7 +46,7 @@ public class TransactionController {
     @PutMapping("/{transactionId}")
     public ResponseEntity<TransactionResponse> updateTransaction(
             @PathVariable Long transactionId,
-            @RequestBody TransactionRequest request) {
+            @Valid @RequestBody TransactionRequest request) {
 
         return ResponseEntity.ok(transactionService.updateTransaction(transactionId, request));
     }

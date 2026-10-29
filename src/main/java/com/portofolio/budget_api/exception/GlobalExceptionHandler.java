@@ -2,11 +2,13 @@ package com.portofolio.budget_api.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -39,5 +41,19 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException exception) {
+        String errorMessage = exception.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation failed " + errorMessage,
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
