@@ -9,4 +9,5 @@ import com.portofolio.budget_api.model.entity.User;
 public interface IUserService {
     UserResponse registerUser(RegisterRequest registerRequest);
     AuthResponse loginUser(LoginRequest loginRequest);
+    void deleteUser(String email);
 }

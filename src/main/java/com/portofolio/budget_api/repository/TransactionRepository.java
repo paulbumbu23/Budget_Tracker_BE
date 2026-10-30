@@ -1,6 +1,7 @@
 package com.portofolio.budget_api.repository;
 
 import com.portofolio.budget_api.model.entity.Transaction;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -14,4 +15,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findByUserId(Long userId);
 
     List<Transaction> findByUserIdAndTransactionDateBetween(Long userId, LocalDateTime startDate, LocalDateTime endDate);
+
+    @Transactional
+    void deleteByUserId(Long userId);
 }

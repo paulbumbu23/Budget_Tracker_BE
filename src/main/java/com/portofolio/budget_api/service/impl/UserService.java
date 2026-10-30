@@ -1,12 +1,14 @@
 package com.portofolio.budget_api.service.impl;
 
 import com.portofolio.budget_api.exception.ResourceAlreadyExistsException;
+import com.portofolio.budget_api.exception.ResourceNotFoundException;
 import com.portofolio.budget_api.model.converter.UserConverter;
 import com.portofolio.budget_api.model.dto.request.LoginRequest;
 import com.portofolio.budget_api.model.dto.request.RegisterRequest;
 import com.portofolio.budget_api.model.dto.response.AuthResponse;
 import com.portofolio.budget_api.model.dto.response.UserResponse;
 import com.portofolio.budget_api.model.entity.User;
+import com.portofolio.budget_api.repository.TransactionRepository;
 import com.portofolio.budget_api.repository.UserRepository;
 import com.portofolio.budget_api.security.JwtUtil;
 import com.portofolio.budget_api.service.IUserService;
@@ -22,6 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService implements IUserService {
     private final UserRepository userRepository;
+    private final TransactionRepository transactionRepository;
     private final UserConverter userConverter;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -53,4 +56,14 @@ public class UserService implements IUserService {
         return new AuthResponse(token, loginRequest.getEmail());
 
     }
+
+    @Override
+    public void deleteUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        transactionRepository.deleteByUserId(user.getId());
+
+        userRepository.delete(user);}
+
 }
