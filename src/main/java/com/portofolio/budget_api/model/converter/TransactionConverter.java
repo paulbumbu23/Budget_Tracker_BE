@@ -13,6 +13,7 @@ public class TransactionConverter {
         transaction.setAmount(transactionRequest.getAmount());
         transaction.setCategory(transactionRequest.getCategory());
         transaction.setDescription(transactionRequest.getDescription());
+        transaction.setCurrency(transactionRequest.getCurrency().toUpperCase());
         transaction.setTransactionDate(transactionRequest.getTransactionDate());
         transaction.setType(transactionRequest.getType());
         return transaction;
@@ -23,6 +24,7 @@ public class TransactionConverter {
         transactionResponse.setId(transaction.getId());
         transactionResponse.setAmount(transaction.getAmount());
         transactionResponse.setCategory(transaction.getCategory());
+        transactionResponse.setCurrency(transaction.getCurrency());
         transactionResponse.setDescription(transaction.getDescription());
         transactionResponse.setTransactionDate(transaction.getTransactionDate());
         transactionResponse.setTransactionType(transaction.getType());

@@ -11,6 +11,7 @@ import com.portofolio.budget_api.model.entity.User;
 import com.portofolio.budget_api.model.enums.TransactionType;
 import com.portofolio.budget_api.repository.TransactionRepository;
 import com.portofolio.budget_api.repository.UserRepository;
+import com.portofolio.budget_api.service.IExchangeRateService;
 import com.portofolio.budget_api.service.ITransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class TransactionService implements ITransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final TransactionConverter transactionConverter;
+    private final IExchangeRateService exchangeRateService;
 
     @Override
     public TransactionResponse addTransaction(String email, TransactionRequest transactionRequest){
@@ -77,7 +79,7 @@ public class TransactionService implements ITransactionService {
     @Override
     public MonthlyReportResponse getMonthlyReport(String email, MonthlyReportRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User with " + email + " not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
 
         YearMonth yearMonth = YearMonth.of(request.getYear(), request.getMonth());
         LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
@@ -86,24 +88,36 @@ public class TransactionService implements ITransactionService {
         List<Transaction> transactions = transactionRepository
                 .findByUserIdAndTransactionDateBetween(user.getId(), startOfMonth, endOfMonth);
 
-        BigDecimal totalIncome = transactions.stream()
-                .filter(t -> t.getType() == TransactionType.INCOME)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalIncomeRON = BigDecimal.ZERO;
+        BigDecimal totalExpenseRON = BigDecimal.ZERO;
 
-        BigDecimal totalExpense = transactions.stream()
-                .filter(t -> t.getType() == TransactionType.EXPENSE)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        for (Transaction t : transactions) {
+            BigDecimal rateToRon = exchangeRateService.getExchangeRate(t.getCurrency(), "RON");
+            BigDecimal amountInRon = t.getAmount().multiply(rateToRon);
 
-        BigDecimal balance = totalIncome.subtract(totalExpense);
+            if (t.getType() == TransactionType.INCOME) {
+                totalIncomeRON = totalIncomeRON.add(amountInRon);
+            } else {
+                totalExpenseRON = totalExpenseRON.add(amountInRon);
+            }
+        }
+
+        BigDecimal balanceRON = totalIncomeRON.subtract(totalExpenseRON);
+
+        BigDecimal ronToEurRate = exchangeRateService.getExchangeRate("RON", "EUR");
+        BigDecimal ronToUsdRate = exchangeRateService.getExchangeRate("RON", "USD");
+
+        BigDecimal balanceEUR = balanceRON.multiply(ronToEurRate);
+        BigDecimal balanceUSD = balanceRON.multiply(ronToUsdRate);
 
         return new MonthlyReportResponse(
                 request.getYear(),
                 request.getMonth(),
-                totalIncome,
-                totalExpense,
-                balance
+                totalIncomeRON,
+                totalExpenseRON,
+                balanceRON,
+                balanceEUR,
+                balanceUSD
         );
     }
 }

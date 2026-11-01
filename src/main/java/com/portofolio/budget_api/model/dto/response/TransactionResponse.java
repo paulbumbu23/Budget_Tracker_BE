@@ -13,6 +13,7 @@ public class TransactionResponse {
     private String category;
     private LocalDateTime transactionDate;
     private String description;
+    private String currency;
     private Long userId;
     private TransactionType transactionType;
 }

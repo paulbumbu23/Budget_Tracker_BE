@@ -1,6 +1,7 @@
 package com.portofolio.budget_api.model.dto.request;
 
 import com.portofolio.budget_api.model.enums.TransactionType;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
@@ -22,6 +23,9 @@ public class TransactionRequest {
 
     @NotNull(message = "Category is mandatory.")
     private String category;
-    
+
+    @NotBlank(message = "Currency is mandatory (e.g., RON, EUR, USD)")
+    private String currency;
+
     private LocalDateTime transactionDate;
 }

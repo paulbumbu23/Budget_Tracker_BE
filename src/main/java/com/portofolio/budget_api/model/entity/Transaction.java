@@ -29,6 +29,9 @@ public class Transaction {
     @Column
     private BigDecimal amount;
 
+    @Column(nullable = false)
+    private String currency;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransactionType type;

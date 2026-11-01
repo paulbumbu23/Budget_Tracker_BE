@@ -41,18 +41,22 @@ public class MonthlyReportScheduler {
             try {
                 MonthlyReportResponse report = transactionService.getMonthlyReport(user.getEmail(), reportRequest);
 
-                if (report.getTotalIncome().signum() == 0 && report.getTotalExpense().signum() == 0) {
+
+                if (report.getTotalIncomeRON().signum() == 0 && report.getTotalExpenseRON().signum() == 0) {
                     continue;
                 }
 
                 String emailBody = String.format(
-                        "Hello,\n\nThis is your financial report for the last month!:) %d/%d:\n\n" +
+                        "Hello,\n\nThis is your financial report for the month %d/%d:\n\n" +
                                 "Total INCOME: %.2f RON\n" +
                                 "Total EXPENSE: %.2f RON\n" +
-                                "Remaining Balance: %.2f RON\n\n" +
-                                "I wish you luck this month!\n BudgetApp Team",
+                                "Remaining Balance (RON): %.2f RON\n" +
+                                "Remaining Balance (EUR): %.2f EUR\n" +
+                                "Remaining Balance (USD): %.2f USD\n\n" +
+                                "I wish you luck this month!\nBudgetApp Team",
                         report.getMonth(), report.getYear(),
-                        report.getTotalIncome(), report.getTotalExpense(), report.getBalance()
+                        report.getTotalIncomeRON(), report.getTotalExpenseRON(),
+                        report.getBalanceRON(), report.getBalanceEUR(), report.getBalanceUSD()
                 );
 
                 emailService.sendSimpleEmail(
